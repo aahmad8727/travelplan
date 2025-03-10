@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'plan.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -20,18 +24,17 @@ class PlanManagerScreen extends StatefulWidget {
 }
 
 class _PlanManagerScreenState extends State<PlanManagerScreen> {
+  /// The main list of plans
   List<Plan> plans = [];
 
-  // CREATE
+  /// CREATE
   void addPlan(Plan plan) {
     setState(() {
       plans.add(plan);
     });
   }
 
-  // READ is handled simply by displaying `plans` in ListView.
-
-  // UPDATE
+  /// UPDATE
   void updatePlan(String id, Plan updatedPlan) {
     setState(() {
       final index = plans.indexWhere((plan) => plan.id == id);
@@ -41,7 +44,7 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
     });
   }
 
-  // TOGGLE (pending <-> completed)
+  /// TOGGLE STATUS
   void togglePlanStatus(String id) {
     setState(() {
       final index = plans.indexWhere((plan) => plan.id == id);
@@ -54,7 +57,7 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
     });
   }
 
-  // DELETE
+  /// DELETE
   void removePlan(String id) {
     setState(() {
       plans.removeWhere((plan) => plan.id == id);
@@ -64,52 +67,46 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Adoption & Travel Plans')),
+      appBar: AppBar(title: const Text('Adoption & Travel Plans')),
       body: buildPlanList(),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
         onPressed: () => openCreatePlanModal(context),
+        child: const Icon(Icons.add),
       ),
     );
   }
 
-  // Displays each Plan in a ListView
+  /// Displays the plans in a ListView
   Widget buildPlanList() {
     return ListView.builder(
       itemCount: plans.length,
       itemBuilder: (context, index) {
         final plan = plans[index];
         return GestureDetector(
-          onLongPress: () {
-            // Edit Plan on Long Press
-            openEditPlanModal(context, plan);
-          },
-          onDoubleTap: () {
-            // Delete Plan on Double Tap
-            removePlan(plan.id);
-          },
+          onLongPress:
+              () => openEditPlanModal(context, plan), // long press to edit
+          onDoubleTap: () => removePlan(plan.id), // double tap to delete
           child: Dismissible(
             key: Key(plan.id),
             direction: DismissDirection.endToStart,
             onDismissed: (direction) {
-              // Mark Plan as Complete/Incomplete on swipe
               togglePlanStatus(plan.id);
             },
             background: Container(
               color: Colors.green,
               alignment: Alignment.centerRight,
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Icon(Icons.check, color: Colors.white),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: const Icon(Icons.check, color: Colors.white),
             ),
             child: ListTile(
-              title: Text(plan.name),
-              subtitle: Text(
-                '${plan.description}\nDate: ${plan.date.toLocal()}',
-              ),
               tileColor:
                   plan.status == PlanStatus.completed
                       ? Colors.grey[300]
                       : Colors.white,
+              title: Text(plan.name),
+              subtitle: Text(
+                '${plan.description}\nDate: ${plan.date.toLocal()}',
+              ),
             ),
           ),
         );
@@ -117,7 +114,7 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
     );
   }
 
-  // CREATE Modal
+  /// Bottom sheet to CREATE a new plan
   void openCreatePlanModal(BuildContext context) {
     final _formKey = GlobalKey<FormState>();
     String name = '';
@@ -142,7 +139,7 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Plan Name'),
+                    decoration: const InputDecoration(labelText: 'Plan Name'),
                     onChanged: (val) => name = val,
                     validator: (val) {
                       if (val == null || val.isEmpty) {
@@ -152,7 +149,7 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
                     },
                   ),
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Description'),
+                    decoration: const InputDecoration(labelText: 'Description'),
                     onChanged: (val) => description = val,
                     validator: (val) {
                       if (val == null || val.isEmpty) {
@@ -168,31 +165,32 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
                           : 'Date: ${selectedDate!.toLocal()}',
                     ),
                     onPressed: () async {
-                      final pickedDate = await showDatePicker(
+                      final picked = await showDatePicker(
                         context: ctx,
                         initialDate: DateTime.now(),
                         firstDate: DateTime(2020),
                         lastDate: DateTime(2030),
                       );
-                      if (pickedDate != null) {
+                      if (picked != null) {
                         setState(() {
-                          selectedDate = pickedDate;
+                          selectedDate = picked;
                         });
                       }
                     },
                   ),
+                  const SizedBox(height: 10),
                   ElevatedButton(
-                    child: Text('Create Plan'),
+                    child: const Text('Create Plan'),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         if (selectedDate == null) {
-                          // If no date is chosen, show a warning
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Please select a date.')),
+                            const SnackBar(
+                              content: Text('Please select a date'),
+                            ),
                           );
                           return;
                         }
-                        // Create new plan
                         final newPlan = Plan(
                           id: DateTime.now().toString(),
                           name: name,
@@ -204,7 +202,7 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
                       }
                     },
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -214,7 +212,7 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
     );
   }
 
-  // EDIT Modal
+  ///EDIT an existing plan
   void openEditPlanModal(BuildContext context, Plan plan) {
     final _formKey = GlobalKey<FormState>();
     String updatedName = plan.name;
@@ -240,7 +238,7 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
                 children: [
                   TextFormField(
                     initialValue: updatedName,
-                    decoration: InputDecoration(labelText: 'Plan Name'),
+                    decoration: const InputDecoration(labelText: 'Plan Name'),
                     onChanged: (val) => updatedName = val,
                     validator: (val) {
                       if (val == null || val.isEmpty) {
@@ -251,7 +249,7 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
                   ),
                   TextFormField(
                     initialValue: updatedDescription,
-                    decoration: InputDecoration(labelText: 'Description'),
+                    decoration: const InputDecoration(labelText: 'Description'),
                     onChanged: (val) => updatedDescription = val,
                     validator: (val) {
                       if (val == null || val.isEmpty) {
@@ -263,24 +261,24 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
                   ElevatedButton(
                     child: Text('Date: ${updatedDate.toLocal()}'),
                     onPressed: () async {
-                      final pickedDate = await showDatePicker(
+                      final picked = await showDatePicker(
                         context: ctx,
                         initialDate: updatedDate,
                         firstDate: DateTime(2020),
                         lastDate: DateTime(2030),
                       );
-                      if (pickedDate != null) {
+                      if (picked != null) {
                         setState(() {
-                          updatedDate = pickedDate;
+                          updatedDate = picked;
                         });
                       }
                     },
                   ),
+                  const SizedBox(height: 10),
                   ElevatedButton(
-                    child: Text('Save Changes'),
+                    child: const Text('Save Changes'),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        // Build a new updated plan object
                         final updatedPlan = Plan(
                           id: plan.id,
                           name: updatedName,
@@ -288,13 +286,12 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
                           date: updatedDate,
                           status: plan.status,
                         );
-                        // Perform update
                         updatePlan(plan.id, updatedPlan);
                         Navigator.of(ctx).pop();
                       }
                     },
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
