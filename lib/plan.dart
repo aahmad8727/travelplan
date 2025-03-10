@@ -1,20 +1,17 @@
-enum PlanStatus { pending, completed } // enum
-enum Priority { low, medium, high } // enum
+enum PlanStatus { pending, completed } // Plan status enum
 
-class Plan { // class
+class Plan {
   final String id;
   String name;
   String description;
   DateTime date;
   PlanStatus status;
-  Priority priority; 
 
-  Plan({ // constructor
+  Plan({
     required this.id,
     required this.name,
     required this.description,
-    required this.date, 
-    this.status = PlanStatus.pending // status
-    this.priority = Priority.medium, //  priority
+    required this.date,
+    this.status = PlanStatus.pending, // Default status is pending
   });
 }
